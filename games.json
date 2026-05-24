@@ -13,7 +13,7 @@
     {"title": "Indiana Jones and the Great Circle", "max_price": 42.99},
     {"title": "Dishonored 2", "max_price": 29.00},
     {"title": "The Invincible", "max_price": 14.00},
-    {"title": "Dragon's Dogma 2", "max_price": 53.00}
+    {"title": "Dragon's Dogma 2", "max_price": 53.00},
     {"title": "Resident Evil Requiem", "max_price": 69.99}
   ],
   "alert_threshold_pct": 20,
