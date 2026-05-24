@@ -1,0 +1,20 @@
+{
+  "watchlist": [
+    {"title": "Kingdom Come: Deliverance II", "max_price": 44.00},
+    {"title": "Ghost of Tsushima", "max_price": 49.00},
+    {"title": "Detroit: Become Human", "max_price": 32.00},
+    {"title": "Metro Exodus", "max_price": 22.00},
+    {"title": "Death Stranding Director's Cut", "max_price": 18.00},
+    {"title": "DEATH STRANDING 2: ON THE BEACH", "max_price": 69.99},
+    {"title": "Hellblade: Senua's Sacrifice", "max_price": 20.99},
+    {"title": "Lies of P", "max_price": 35.00},
+    {"title": "Horizon Forbidden West", "max_price": 49.00},
+    {"title": "Black Myth: Wukong", "max_price": 60.00},
+    {"title": "Indiana Jones and the Great Circle", "max_price": 42.99},
+    {"title": "Dishonored 2", "max_price": 29.00},
+    {"title": "The Invincible", "max_price": 14.00},
+    {"title": "Dragon's Dogma 2", "max_price": 53.00}
+  ],
+  "alert_threshold_pct": 20,
+  "deals_alert": {"min_original_price": 40.00, "min_discount_pct": 20}
+}
