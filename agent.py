@@ -104,13 +104,13 @@ def check_games():
                 g["title"].lower() in name.lower() or name.lower() in g["title"].lower()
                 for g in watchlist
             )
-            if not in_watchlist and original >= deals_min_price and discount >= deals_min_pct:
+            if not in_watchlist and original >= 25 and (discount >= 30 or original >= 40):
                 alerts.append(
-                    f"🔥 *Oferta Steam: {name}*\n"
-                    f"💰 ~~${original:.2f}~~ → *${current:.2f}*\n"
-                    f"📉 {discount}% off\n"
-                    f"🔗 https://store.steampowered.com/app/{app_id}"
-                )
+                        f"🔥 *Oferta Steam: {name}*\n"
+                        f"💰 ~~${original:.2f}~~ → *${current:.2f}*\n"
+                        f"📉 {discount}% off\n"
+                        f"🔗 https://store.steampowered.com/app/{app_id}"
+                    )
 
         # Epic Games: ofertas con descuento
         r2 = requests.get(
@@ -142,7 +142,7 @@ def check_games():
             original = price_info.get("originalPrice", 0) / 100
             current = price_info.get("discountPrice", 0) / 100
 
-            if original < deals_min_price and discount_pct < 100:
+            if original < 25 or (original < 40 and discount_pct < 30 and discount_pct != 100):
                 continue
 
             seen_names.add(name)
