@@ -83,6 +83,7 @@ def check_games():
         params = {
             "key": itad_key,
             "shops": "61,35,16",  # 61=Steam, 35=Epic, 16=GOG
+            "country": "US",
             "limit": 50,
         }
         r = requests.get(deals_url, params=params, timeout=10)
