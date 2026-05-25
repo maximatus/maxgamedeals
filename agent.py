@@ -75,46 +75,91 @@ def check_games():
 
 # Alertas de juegos caros con descuento (no en tu lista)
 # Alertas via IsThereAnyDeal API
+# Alertas via Steam + Epic
     try:
-        itad_key = os.getenv("ITAD_API_KEY")
-        
-        # Endpoint ITAD: deals actuales filtrados por tiendas oficiales
-        deals_url = "https://api.isthereanydeal.com/deals/v2"
-        params = {
-            "key": itad_key,
-            "shops": "61,35,16",  # 61=Steam, 35=Epic, 16=GOG
-            "country": "US",
-            "type": "game",
-            "priceMin": 40,
-            "limit": 50,
-        }
-        r = requests.get(deals_url, params=params, timeout=10)
+        seen_names = set()
+
+        # Steam: featuredcategories
+        r = requests.get(
+            "https://store.steampowered.com/api/featuredcategories/?cc=US&l=en",
+            timeout=10
+        )
         data = r.json()
-        items = data.get("list", [])
-        
-        for item in items:
-            name = item.get("title", "")
-            deal = item.get("deal", {})
-            price_new = deal.get("price", {}).get("amount", 0)
-            price_old = deal.get("regular", {}).get("amount", 0)
-            discount = deal.get("cut", 0)
-            shop = item.get("shop", {}).get("name", "")
-            url = item.get("urls", {}).get("game", "")
-            
-            if price_old < deals_min_price or discount < deals_min_pct:
+        steam_items = []
+        for section in ["specials", "top_sellers", "new_releases"]:
+            steam_items += data.get(section, {}).get("items", [])
+
+        for item in steam_items:
+            name = item.get("name", "")
+            original = (item.get("original_price") or 0) / 100
+            current = (item.get("final_price") or 0) / 100
+            discount = item.get("discount_percent", 0)
+            app_id = item.get("id", "")
+
+            if not name or name in seen_names:
                 continue
-            
+            seen_names.add(name)
+
+            in_watchlist = any(
+                g["title"].lower() in name.lower() or name.lower() in g["title"].lower()
+                for g in watchlist
+            )
+            if not in_watchlist and original >= deals_min_price and discount >= deals_min_pct:
+                alerts.append(
+                    f"🔥 *Oferta Steam: {name}*\n"
+                    f"💰 ~~${original:.2f}~~ → *${current:.2f}*\n"
+                    f"📉 {discount}% off\n"
+                    f"🔗 https://store.steampowered.com/app/{app_id}"
+                )
+
+        # Epic Games: ofertas con descuento
+        r2 = requests.get(
+            "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US",
+            timeout=10
+        )
+        epic_data = r2.json()
+        epic_games = epic_data.get("data", {}).get("Catalog", {}).get("searchStore", {}).get("elements", [])
+
+        for game in epic_games:
+            name = game.get("title", "")
+            if not name or name in seen_names:
+                continue
+
+            promotions = game.get("promotions") or {}
+            offers = promotions.get("promotionalOffers", [])
+            if not offers:
+                continue
+
+            offer_list = offers[0].get("promotionalOffers", []) if offers else []
+            if not offer_list:
+                continue
+
+            discount_pct = offer_list[0].get("discountSetting", {}).get("discountPercentage", 0)
+            if discount_pct == 0:
+                discount_pct = 100  # gratis
+
+            price_info = game.get("price", {}).get("totalPrice", {})
+            original = price_info.get("originalPrice", 0) / 100
+            current = price_info.get("discountPrice", 0) / 100
+
+            if original < deals_min_price and discount_pct < 100:
+                continue
+
+            seen_names.add(name)
             in_watchlist = any(
                 g["title"].lower() in name.lower() or name.lower() in g["title"].lower()
                 for g in watchlist
             )
             if not in_watchlist:
+                emoji = "🎁" if discount_pct == 100 else "🔥"
+                label = "GRATIS" if discount_pct == 100 else f"{discount_pct}% off"
                 alerts.append(
-                    f"🔥 *Oferta en {shop}: {name}*\n"
-                    f"💰 Precio: ~~${price_old:.2f}~~ → *${price_new:.2f}*\n"
-                    f"📉 Descuento: {discount}%\n"
-                    f"🔗 {url}"
+                    f"{emoji} *Epic: {name}*\n"
+                    f"💰 ~~${original:.2f}~~ → *${current:.2f}*\n"
+                    f"📉 {label}\n"
+                    f"🔗 https://store.epicgames.com/en-US/p/{game.get('productSlug', '')}"
                 )
+
     except Exception:
         pass
 
