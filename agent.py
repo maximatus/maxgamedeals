@@ -84,7 +84,6 @@ def check_games():
             "key": itad_key,
             "shops": "61,35,16",  # 61=Steam, 35=Epic, 16=GOG
             "limit": 50,
-            "filter": f"price:{deals_min_price}",
         }
         r = requests.get(deals_url, params=params, timeout=10)
         data = r.json()
